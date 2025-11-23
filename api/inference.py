@@ -7,7 +7,7 @@ device = "mps" if torch.backends.mps.is_available() else "cpu"
 model_name = "OpenAlex/bert-base-multilingual-cased-finetuned-openalex-topic-classification-title-abstract"
 
 # Minimum confidence score threshold for classification results
-MIN_SCORE = 0.2
+MIN_SCORE = 0.3
 
 classifier = pipeline(
     "text-classification",

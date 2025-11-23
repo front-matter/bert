@@ -31,14 +31,12 @@ app = cors(app, allow_origin="*")
 
 def run() -> None:
     """Run the app."""
-    from hypercorn.asyncio import serve
-    from hypercorn.config import Config
-    import asyncio
-    
-    config = Config()
-    config.bind = ["0.0.0.0:5100"]
-    
-    asyncio.run(serve(app, config))
+    import subprocess
+    import sys
+
+    subprocess.run(
+        [sys.executable, "-m", "hypercorn", "api:app", "--config", "hypercorn.toml"]
+    )
 
 
 @app.route("/heartbeat")
@@ -57,10 +55,9 @@ async def classify_text():
     ):
         return {"error": "Unauthorized."}, 401
 
-    title = request.args.get("title", None)
-    abstract = request.args.get("abstract", None)
-    if not title and not abstract:
-        return {"error": "No input provided"}, 400
+    data = await request.get_json()
+    if not data:
+        return {"error": "No JSON data provided"}, 400
 
-    result = await classify(title, abstract)
+    result = await classify(data.get("title", None), data.get("abstract", None))
     return jsonify(result)

@@ -1,4 +1,4 @@
-# bert
+# rogue-scholar-bert
 
 ## License
 

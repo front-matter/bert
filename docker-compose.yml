@@ -10,14 +10,11 @@ services:
       - caddy_data:/data
       - caddy_config:/config
   bert:
-    image: ghcr.io/front-matter/bert:latest
-    volumes:
-      - ./inference.py:/app/inference.py
+    image: ghcr.io/front-matter/rogue-scholar-bert:latest
     environment:
       - PYTHONUNBUFFERED=1
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:6000/classify', data=b'{\"text\":\"test\"}').read()"]
       interval: 30s
       timeout: 10s
       retries: 3

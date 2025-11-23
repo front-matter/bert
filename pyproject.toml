@@ -1,0 +1,49 @@
+[project]
+name = "rogue-scholar-bert"
+version = "0.2.0"
+description = "Rogue Scholar BERT subject classification service"
+authors = [{ name = "Martin Fenner", email = "martin@front-matter.io" }]
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+  "Quart>=0.20,<0.21",
+  "transformers>=4.46,<4.47",
+  "hypercorn>=0.17,<0.18",
+  "python-dotenv>=1.0.0,<2",
+  "quart-schema>=0.17.1,<0.18",
+  "quart-cors>=0.7.0,<0.8",
+  "quart-rate-limiter>=0.10.0,<0.11",
+]
+
+[project.optional-dependencies]
+cpu = ["torch>=2.5,<2.6"]
+
+[tool.uv.sources]
+torch = { index = "pytorch-cpu" }
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[project.urls]
+Homepage = "https://rogue-scholar.org"
+Repository = "https://github.com/front-matter/rogue-scholar-bert"
+Documentation = "https://docs.rogue-scholar.org"
+
+[project.scripts]
+start = "api:run"
+
+[tool.hatch.build.targets.sdist]
+include = ["api"]
+
+[tool.hatch.build.targets.wheel]
+include = ["api"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.ruff]
+line-length = 88
+select = ["F401", "F403"]

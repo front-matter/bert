@@ -10,7 +10,7 @@ services:
       - caddy_data:/data
       - caddy_config:/config
   bert:
-    build: .
+    image: ghcr.io/front-matter/bert:latest
     volumes:
       - ./inference.py:/app/inference.py
     environment:

@@ -18,14 +18,13 @@ from api.inference import classify
 config = Config()
 config.from_toml("hypercorn.toml")
 load_dotenv()
-rate_limiter = RateLimiter()
 logger = logging.getLogger(__name__)
-version = "0.2.0"
+version = "0.2.1"
 
 app = Quart(__name__, static_folder="static", static_url_path="")
 app.config.from_prefixed_env()
 QuartSchema(app, info=Info(title="Rogue Scholar Bert API", version=version))
-rate_limiter = RateLimiter(app, default_limits=[RateLimit(15, timedelta(seconds=60))])
+limiter = RateLimiter(app, default_limits=[RateLimit(10, timedelta(seconds=60))])
 app = cors(app, allow_origin="*")
 
 
@@ -41,6 +40,7 @@ async def heartbeat():
 
 
 @app.route("/classify", methods=["POST"])
+@rate_limit("5 per minute")
 async def classify_text():
     """classify text input."""
     if (
@@ -55,4 +55,20 @@ async def classify_text():
         return {"error": "No JSON data provided"}, 400
 
     result = await classify(data.get("title", None), data.get("abstract", None))
-    return jsonify(result)
+    response = jsonify(result)
+    response.headers["Retry-After"] = "30"
+    return response
+
+
+@app.errorhandler(429)
+async def ratelimit_handler(e):
+    return (
+        jsonify(
+            {
+                "error": "Too Many Requests",
+                "detail": "Rate limit exceeded. Please retry later.",
+            }
+        ),
+        429,
+        {"Retry-After": str(e.retry_after)},  # number of seconds to wait
+    )

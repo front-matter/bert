@@ -40,7 +40,7 @@ async def heartbeat():
 
 
 @app.route("/classify", methods=["POST"])
-@rate_limit(10, timedelta(seconds=60))
+@rate_limit(4, timedelta(seconds=30))
 async def classify_text():
     """classify text input."""
     if (

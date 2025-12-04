@@ -59,6 +59,7 @@ async def classify_text():
 
 @app.errorhandler(429)
 async def ratelimit_handler(e):
+    retry_after = getattr(e, "retry_after", None) or 60
     return (
         jsonify(
             {
@@ -67,5 +68,5 @@ async def ratelimit_handler(e):
             }
         ),
         429,
-        {"Retry-After": str(e.retry_after)},  # number of seconds to wait
+        {"Retry-After": str(int(retry_after))},
     )

@@ -9,7 +9,7 @@ from quart_schema import (
     QuartSchema,
     Info,
 )
-from quart_rate_limiter import RateLimiter, rate_limit
+from quart_rate_limiter import RateLimiter, RateLimit, rate_limit
 from quart_cors import cors
 
 from api.inference import classify
@@ -39,7 +39,7 @@ async def heartbeat():
 
 
 @app.route("/classify", methods=["POST"])
-@rate_limit("10 per minute")
+@rate_limit(RateLimit(10, timedelta(minutes=1)))
 async def classify_text():
     """classify text input."""
     if (
@@ -59,7 +59,11 @@ async def classify_text():
 
 @app.errorhandler(429)
 async def ratelimit_handler(e):
-    retry_after = getattr(e, "retry_after", None) or 60
+    retry_after = getattr(e, "retry_after", None)
+    if retry_after and hasattr(retry_after, "total_seconds"):
+        retry_seconds = int(retry_after.total_seconds())
+    else:
+        retry_seconds = 60
     return (
         jsonify(
             {
@@ -68,5 +72,5 @@ async def ratelimit_handler(e):
             }
         ),
         429,
-        {"Retry-After": str(int(retry_after))},
+        {"Retry-After": str(retry_seconds)},
     )
